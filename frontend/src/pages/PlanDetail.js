@@ -44,7 +44,7 @@ export default function PlanDetail() {
   const navigate = useNavigate();
   const [plan, setPlan] = useState(null);
   const [results, setResults] = useState(null);
-  const [tab, setTab] = useState("map");
+  const [tab, setTab] = useState("routes");
   const [selectedDay, setSelectedDay] = useState(null);
   const [elapsed, setElapsed] = useState(0);
   const [depot, setDepot] = useState(null);
@@ -192,24 +192,47 @@ export default function PlanDetail() {
               </div>
             </div>
 
-            <div className="tab-bar">
-              {[
-                { key: "map", label: "Harita" },
-                { key: "clusters", label: "Kümeleme" },
-                { key: "charts", label: "Grafikler" },
-                { key: "weekly", label: "Haftalık Plan" },
-                { key: "daily", label: "Günlük Plan" },
-                { key: "routes", label: "Rotalar" },
-              ].map((t) => (
-                <button
-                  key={t.key}
-                  className={`tab-item ${tab === t.key ? "active" : ""}`}
-                  onClick={() => setTab(t.key)}
+            {/* Mobilde dropdown, masaüstünde tab-bar */}
+            {window.innerWidth <= 768 ? (
+              <div style={{ marginBottom: 16 }}>
+                <select
+                  className="form-input"
+                  value={tab}
+                  onChange={(e) => setTab(e.target.value)}
+                  style={{ width: "100%", fontWeight: 600 }}
                 >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+                  {[
+                    { key: "routes", label: "🗺️ Rotalar" },
+                    { key: "map", label: "📍 Harita" },
+                    { key: "clusters", label: "📊 Kümeleme" },
+                    { key: "charts", label: "📈 Grafikler" },
+                    { key: "weekly", label: "📅 Haftalık Plan" },
+                    { key: "daily", label: "📋 Günlük Plan" },
+                  ].map((t) => (
+                    <option key={t.key} value={t.key}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="tab-bar">
+                {[
+                  { key: "routes", label: "Rotalar" },
+                  { key: "map", label: "Harita" },
+                  { key: "clusters", label: "Kümeleme" },
+                  { key: "charts", label: "Grafikler" },
+                  { key: "weekly", label: "Haftalık Plan" },
+                  { key: "daily", label: "Günlük Plan" },
+                ].map((t) => (
+                  <button
+                    key={t.key}
+                    className={`tab-item ${tab === t.key ? "active" : ""}`}
+                    onClick={() => setTab(t.key)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {tab === "map" && <MapTab results={results} selectedDay={selectedDay} setSelectedDay={setSelectedDay} depot={depot} />}
             {tab === "clusters" && <ClustersTab results={results} stList={stList} users={users} depot={depot} />}
