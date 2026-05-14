@@ -1352,6 +1352,27 @@ tbody tr:last-child td { border-bottom: none; }
     font-size: 10px;
   }
 
+  /* Tab bar — mobilde kaydırılabilir */
+  .tab-bar {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 12px !important;
+    margin: 0 -10px 16px !important;
+    gap: 0 !important;
+    scrollbar-width: none;
+  }
+
+  .tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-item {
+    padding: 10px 12px !important;
+    font-size: 11px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   /* Filter bar */
   .form-input {
     font-size: 16px !important;

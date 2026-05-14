@@ -742,7 +742,7 @@ function DailyTab({ results, stList, depot }) {
 /* ═══ ROUTES TAB ═══ */
 function RoutesTab({ results, stList }) {
   const [filterST, setFilterST] = useState(stList[0] ?? 0);
-  const [filterDay, setFilterDay] = useState(null);
+  const [filterDay, setFilterDay] = useState(1);
 
   const seen = new Set();
   const deduped = results.routes.filter((r) => {
@@ -754,7 +754,7 @@ function RoutesTab({ results, stList }) {
 
   const filtered = deduped
     .filter((r) => r.cluster_index === filterST)
-    .filter((r) => filterDay === null || r.day_of_week === filterDay)
+    .filter((r) => r.day_of_week === filterDay)
     .sort((a, b) => a.day_of_week - b.day_of_week);
 
   return (
@@ -773,7 +773,6 @@ function RoutesTab({ results, stList }) {
         <div>
           <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>Gün</div>
           <div className="seg-bar">
-            <button className={`seg-item ${filterDay === null ? "active" : ""}`} onClick={() => setFilterDay(null)}>Tümü</button>
             {[1, 2, 3, 4, 5, 6].map((d) => (
               <button key={d} className={`seg-item ${filterDay === d ? "active" : ""}`} onClick={() => setFilterDay(d)}>
                 {DAY_SHORT[d]}
