@@ -1364,9 +1364,8 @@ tbody tr:last-child td { border-bottom: none; }
     font-size: 20px !important;
   }
 
-  .auth-qr img {
-    width: 100px !important;
-    height: 100px !important;
+  .auth-qr {
+    display: none !important;
   }
 
   /* Leaflet harita */
