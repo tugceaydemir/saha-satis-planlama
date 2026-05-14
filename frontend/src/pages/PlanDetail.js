@@ -207,7 +207,6 @@ export default function PlanDetail() {
                     { key: "clusters", label: "📊 Kümeleme" },
                     { key: "charts", label: "📈 Grafikler" },
                     { key: "weekly", label: "📅 Haftalık Plan" },
-                    { key: "daily", label: "📋 Günlük Plan" },
                   ].map((t) => (
                     <option key={t.key} value={t.key}>{t.label}</option>
                   ))}
@@ -221,7 +220,6 @@ export default function PlanDetail() {
                   { key: "clusters", label: "Kümeleme" },
                   { key: "charts", label: "Grafikler" },
                   { key: "weekly", label: "Haftalık Plan" },
-                  { key: "daily", label: "Günlük Plan" },
                 ].map((t) => (
                   <button
                     key={t.key}
@@ -238,7 +236,6 @@ export default function PlanDetail() {
             {tab === "clusters" && <ClustersTab results={results} stList={stList} users={users} depot={depot} />}
             {tab === "charts" && <ChartsTab results={results} />}
             {tab === "weekly" && <WeeklyTab results={results} stList={stList} />}
-            {tab === "daily" && <DailyTab results={results} stList={stList} depot={depot} />}
             {tab === "routes" && <RoutesTab results={results} stList={stList} />}
           </>
         )}
@@ -448,8 +445,6 @@ function ClustersTab({ results, stList, users, depot }) {
                   <tr>
                     <th>#</th>
                     <th>Müşteri Adı</th>
-                    <th>Enlem</th>
-                    <th>Boylam</th>
                     <th>Aylık Ciro</th>
                     <th>Ziyaret Sıklığı</th>
                     <th>Merkez</th>
@@ -460,8 +455,6 @@ function ClustersTab({ results, stList, users, depot }) {
                     <tr key={c.customer_id}>
                       <td className="cell-dim">{i + 1}</td>
                       <td className="cell-bold">{c.customer_name}</td>
-                      <td className="cell-mono">{c.x.toFixed(6)}</td>
-                      <td className="cell-mono">{c.y.toFixed(6)}</td>
                       <td className="cell-mono">{Number(c.monthly_revenue).toLocaleString("tr-TR")} ₺</td>
                       <td><span className="badge-freq">{c.visit_frequency}x / hafta</span></td>
                       <td>{c.customer_id === c.center_customer_id ? <span style={{ color: color, fontWeight: 700 }}>★ Merkez</span> : "—"}</td>
@@ -614,153 +607,6 @@ function WeeklyTab({ results, stList }) {
   );
 }
 
-/* ═══ DAILY TAB ═══ */
-function DailyTab({ results, stList, depot }) {
-  const [selST, setSelST] = useState(stList[0] ?? 0);
-  const [selDay, setSelDay] = useState(1);
-
-  const route = results.routes.find((r) => r.cluster_index === selST && r.day_of_week === selDay);
-  const dayCustomers = results.weekly_plan
-    .filter((w) => w.cluster_index === selST && w.day_of_week === selDay);
-
-  const stPoints = results.clusters.filter((c) => c.cluster_index === selST);
-  const color = COLORS[selST % COLORS.length];
-
-  const center = stPoints.length > 0
-    ? [stPoints.reduce((s, p) => s + p.x, 0) / stPoints.length, stPoints.reduce((s, p) => s + p.y, 0) / stPoints.length]
-    : [38.6, 27.4];
-
-  return (
-    <div>
-      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>Satış Temsilcisi</div>
-          <div className="seg-bar">
-            {stList.map((ci) => (
-              <button key={ci} className={`seg-item ${selST === ci ? "active" : ""}`} onClick={() => setSelST(ci)}>
-                ST {ci}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>Gün</div>
-          <div className="seg-bar">
-            {[1, 2, 3, 4, 5, 6].map((d) => (
-              <button key={d} className={`seg-item ${selDay === d ? "active" : ""}`} onClick={() => setSelDay(d)}>
-                {DAY_SHORT[d]}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: window.innerWidth <= 768 ? "1fr" : "1fr 1fr", gap: 16 }}>
-        <div className="panel" style={{ marginBottom: 0 }}>
-          <div className="panel-header">
-            <h3>
-              <span className="cluster-dot" style={{ background: color }} />
-              ST {selST} — {DAY_NAMES[selDay]}
-            </h3>
-            {route && (
-              <span className="panel-info">{route.customer_count} müşteri · {route.total_distance?.toFixed(2)} km</span>
-            )}
-          </div>
-          <div style={{ height: window.innerWidth <= 768 ? 280 : 400 }}>
-            <MapContainer center={center} zoom={13} style={{ height: "100%", width: "100%" }} key={`${selST}-${selDay}`}>
-              <TileLayer url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" attribution='&copy; Google Maps' />
-              {route && route.stops.map((s) => (
-                <Marker key={s.visit_order} position={[s.x, s.y]} icon={makeNumberIcon(s.visit_order, color)}>
-                  <Popup>
-                    <div style={{ fontSize: 13 }}>
-                      <strong>{s.visit_order}. {s.customer_name}</strong><br />
-                      {s.estimated_arrival_minutes != null && `Tahmini varış: ${s.estimated_arrival_minutes.toFixed(0)} dk`}
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-              {route && route.stops.length >= 2 && (
-                <Polyline positions={route.stops.map((s) => [s.x, s.y])} color={color} weight={3} opacity={0.8} />
-              )}
-              {depot && (
-                <Marker position={[depot.depot_x, depot.depot_y]} icon={depotIcon}>
-                  <Popup><strong>DEPO</strong></Popup>
-                </Marker>
-              )}
-            </MapContainer>
-          </div>
-        </div>
-
-        <div>
-          {!route || route.stops.length === 0 ? (
-            <div className="panel">
-              <div className="empty-state">
-                <p>Bu gün için ST {selST}'ye atanmış ziyaret bulunmuyor.</p>
-              </div>
-            </div>
-          ) : (
-            <div className="panel" style={{ marginBottom: 0 }}>
-              <div className="panel-header">
-                <h3>Ziyaret Sırası</h3>
-                <span className="panel-info">{route.total_distance?.toFixed(2)} km toplam</span>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Sıra</th>
-                    <th>Müşteri</th>
-                    <th>Tahmini Varış</th>
-                    <th>Navigasyon</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {route.stops.map((s) => (
-                    <tr key={s.visit_order}>
-                      <td>
-                        <span style={{
-                          display: "inline-flex", alignItems: "center", justifyContent: "center",
-                          width: 26, height: 26, borderRadius: "50%", background: color, color: "#fff",
-                          fontSize: 12, fontWeight: 700,
-                        }}>{s.visit_order}</span>
-                      </td>
-                      <td className="cell-bold">{s.customer_name}</td>
-                      <td className="cell-mono">
-                        {s.estimated_arrival_minutes != null ? `${s.estimated_arrival_minutes.toFixed(0)} dk` : "—"}
-                      </td>
-                      <td>
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${s.x},${s.y}`}
-                          target="_blank" rel="noopener noreferrer"
-                          className="btn btn-emphasized btn-xs"
-                        >
-                          Yol Tarifi
-                        </a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {dayCustomers.length > 0 && !route && (
-            <div className="panel">
-              <div className="panel-header"><h3>Atanan Müşteriler (rota henüz yok)</h3></div>
-              <table>
-                <thead><tr><th>Müşteri</th></tr></thead>
-                <tbody>
-                  {dayCustomers.map((w) => (
-                    <tr key={w.customer_id}><td className="cell-bold">{w.customer_name}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ═══ ROUTES TAB ═══ */
 function RoutesTab({ results, stList }) {
