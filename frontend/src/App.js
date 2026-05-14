@@ -19,6 +19,7 @@ import "./App.css";
 function ProtectedLayout({ user, onLogout, children }) {
   const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -27,9 +28,15 @@ function ProtectedLayout({ user, onLogout, children }) {
     navigate("/login");
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   return (
     <div className="app">
-      <nav className="sidebar">
+      <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        {sidebarOpen ? "✕" : "☰"}
+      </button>
+      {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} />}
+      <nav className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="logo">
           <div className="logo-icon">SS</div>
           <h2>Saha Satış</h2>
@@ -39,37 +46,37 @@ function ProtectedLayout({ user, onLogout, children }) {
           {isAdmin && (
             <>
               <li>
-                <NavLink to="/" end>
+                <NavLink to="/" end onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
                   Gösterge Paneli
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/customers">
+                <NavLink to="/customers" onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
                   Müşteri Yönetimi
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/plans">
+                <NavLink to="/plans" onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
                   Plan Yönetimi
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/staff">
+                <NavLink to="/staff" onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></span>
                   Personel Yönetimi
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/performance">
+                <NavLink to="/performance" onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
                   Performans Takibi
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/announcements">
+                <NavLink to="/announcements" onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg></span>
                   Duyurular
                 </NavLink>
@@ -79,19 +86,19 @@ function ProtectedLayout({ user, onLogout, children }) {
           {!isAdmin && (
             <>
               <li>
-                <NavLink to="/" end>
+                <NavLink to="/" end onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
                   Performans Paneli
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/my-plan">
+                <NavLink to="/my-plan" onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
                   Benim Planım
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/announcements">
+                <NavLink to="/announcements" onClick={closeSidebar}>
                   <span className="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg></span>
                   Duyurular
                 </NavLink>
