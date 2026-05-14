@@ -239,13 +239,13 @@ def get_route_geometry_for_day(
     depot = (depot_setting.depot_x, depot_setting.depot_y)
     full_route_coords = [depot] + waypoint_coords + [depot]
 
-    # OSRM'den gerçek yol geometrisi al
-    result = get_route_geometry(full_route_coords, overview="full")
+    # TomTom'dan gerçek yol geometrisi al
+    result = get_route_geometry(full_route_coords)
 
     if result is None:
         raise HTTPException(
             status_code=502,
-            detail="OSRM servisinden geometri alınamadı. Lütfen tekrar deneyin."
+            detail="TomTom servisinden geometri alınamadı. Lütfen tekrar deneyin."
         )
 
     return RouteGeometryOut(
