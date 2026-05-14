@@ -11,12 +11,14 @@ from ..models import (
 )
 from ..schemas import (
     PlanCreate, PlanOut, PlanResultOut,
-    ClusterAssignmentOut, WeeklyAssignmentOut, DailyRouteOut, RouteStopOut
+    ClusterAssignmentOut, WeeklyAssignmentOut, DailyRouteOut, RouteStopOut,
+    RouteGeometryOut,
 )
 from ..auth import get_current_user
 from ..services.clustering import run_simulated_annealing
 from ..services.assignment import run_weekly_assignment
 from ..services.routing import solve_route
+from ..services.tomtom_geometry import get_route_geometry
 
 DAY_NAMES = {1: "Pzt", 2: "Salı", 3: "Çar", 4: "Per", 5: "Cum", 6: "Cmt"}
 
@@ -155,6 +157,102 @@ def get_plan_results(plan_id: int, db: Session = Depends(get_db)):
     return PlanResultOut(
         plan=PlanOut.model_validate(plan),
         clusters=clusters, weekly_plan=weekly, routes=routes,
+    )
+
+
+@router.get("/{plan_id}/routes/{day}/geometry", response_model=RouteGeometryOut)
+def get_route_geometry_for_day(
+    plan_id: int,
+    day: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """
+    Bir planın belirli günü için gerçek yol geometrisini OSRM'den alır.
+
+    Akış:
+      1. Kullanıcının cluster_index'i alınır
+      2. O cluster'a + güne ait DailyRoute bulunur
+      3. Stops'tan koordinatlar sırayla çıkarılır
+      4. Önüne ve arkasına depo koordinatları eklenir
+      5. OSRM'den gerçek yol geometrisi alınır
+      6. Sonuç dönülür
+
+    Hem mobil hem web bu endpoint'i kullanır.
+    """
+    plan = db.query(Plan).filter(Plan.id == plan_id).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan bulunamadı")
+
+    # Admin ise tüm cluster'ları görebilir, kullanıcı sadece kendi cluster'ını
+    if user.role == "admin":
+        # Admin için query parametresi olarak cluster_index beklenebilir,
+        # ama şimdilik MyPlan flow'u için kullanıcı cluster_index'i kullanıyoruz.
+        # İleride admin paneli için ek bir endpoint açılabilir.
+        cluster_index = user.cluster_index
+        if cluster_index is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Admin kullanıcının kendi cluster_index'i yok; bu endpoint admin için henüz açılmadı."
+            )
+    else:
+        if user.cluster_index is None:
+            raise HTTPException(status_code=400, detail="Size atanmış bir bölge yok")
+        cluster_index = user.cluster_index
+
+    # DailyRoute'u bul
+    daily_route = db.query(DailyRoute).filter(
+        DailyRoute.plan_id == plan_id,
+        DailyRoute.cluster_index == cluster_index,
+        DailyRoute.day_of_week == day,
+    ).first()
+
+    if not daily_route:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Bu plan ve gün için rota bulunamadı (cluster {cluster_index}, gün {day})"
+        )
+
+    # Stops'u sırayla çek
+    stops = db.query(RouteStop).filter(
+        RouteStop.daily_route_id == daily_route.id
+    ).order_by(RouteStop.visit_order).all()
+
+    if not stops:
+        raise HTTPException(status_code=404, detail="Bu rotada hiç durak yok")
+
+    # Durak koordinatlarını çıkar (her durağın bağlı olduğu müşteriden)
+    waypoint_coords = []
+    for stop in stops:
+        customer = db.query(Customer).filter(Customer.id == stop.customer_id).first()
+        if customer:
+            waypoint_coords.append((customer.x, customer.y))
+
+    if not waypoint_coords:
+        raise HTTPException(status_code=404, detail="Durak koordinatları bulunamadı")
+
+    # Depo koordinatlarını ekle (başa ve sona)
+    depot_setting = db.query(AppSettings).first()
+    if not depot_setting:
+        raise HTTPException(status_code=500, detail="Depo ayarı bulunamadı")
+
+    depot = (depot_setting.depot_x, depot_setting.depot_y)
+    full_route_coords = [depot] + waypoint_coords + [depot]
+
+    # OSRM'den gerçek yol geometrisi al
+    result = get_route_geometry(full_route_coords, overview="full")
+
+    if result is None:
+        raise HTTPException(
+            status_code=502,
+            detail="OSRM servisinden geometri alınamadı. Lütfen tekrar deneyin."
+        )
+
+    return RouteGeometryOut(
+        geometry=result["geometry"],
+        distance_meters=result["distance_meters"],
+        duration_seconds=result["duration_seconds"],
+        waypoints=[[lat, lon] for lat, lon in full_route_coords],
     )
 
 

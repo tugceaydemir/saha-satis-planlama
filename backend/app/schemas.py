@@ -134,6 +134,23 @@ class DailyRouteOut(BaseModel):
     stops: list[RouteStopOut]
 
 
+# ─── Route Geometry (Faz 1 — OSRM ile gerçek yol çizgisi) ───
+class RouteGeometryOut(BaseModel):
+    """
+    OSRM'den alinan gercek yol geometrisi.
+
+    geometry: [[lat, lon], [lat, lon], ...] formatinda nokta listesi.
+              Frontend bu listeyi Polyline icin dogrudan kullanabilir.
+    distance_meters: OSRM'in hesapladigi gercek yol mesafesi (metre)
+    duration_seconds: OSRM'in tahmini suresi (saniye, trafik HARI\u00c7)
+    waypoints: Durak koordinatlari (sira ile). Frontend marker icin kullanabilir.
+    """
+    geometry: list[list[float]]
+    distance_meters: float
+    duration_seconds: float
+    waypoints: list[list[float]]
+
+
 # ─── Plan Full Result ──────────────────────
 # ─── Settings ─────────────────────────────
 class DepotUpdate(BaseModel):
