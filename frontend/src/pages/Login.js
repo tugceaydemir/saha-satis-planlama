@@ -71,6 +71,31 @@ export default function Login({ onLogin }) {
             </Link>
           </div>
         </form>
+        <div className="auth-qr">
+          <div style={{
+            margin: "20px auto 0",
+            padding: 16,
+            background: "rgba(99,102,241,0.06)",
+            borderRadius: 14,
+            textAlign: "center",
+            maxWidth: 220,
+            border: "1px dashed rgba(99,102,241,0.2)"
+          }}>
+            <img
+              src={`${process.env.PUBLIC_URL}/qr-code.png`}
+              alt="QR Kod"
+              style={{ width: 120, height: 120, borderRadius: 8 }}
+            />
+            <p style={{
+              margin: "10px 0 0",
+              fontSize: 11,
+              color: "#94a3b8",
+              lineHeight: 1.4
+            }}>
+              Telefonunuzla okutarak<br/>mobilde açabilirsiniz
+            </p>
+          </div>
+        </div>
         <div className="auth-footer">
           <span style={{ color: "#94a3b8", fontSize: 12 }}>Hesabınız yoksa yöneticinizle iletişime geçin</span>
         </div>
