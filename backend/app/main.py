@@ -1,5 +1,10 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# .env dosyasini yukle (yalnizca lokal gelistirmede gereklidir;
+# Render'da env varlar otomatik olarak process'e enjekte edilir).
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

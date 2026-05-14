@@ -7,6 +7,7 @@ solve_tdvrp ve evaluate_route_with_real_traffic fonksiyonlari
 orijinal koddan degistirilmeden alinmistir.
 """
 import math
+import os
 import time as time_module
 from datetime import datetime, timedelta
 import pulp
@@ -14,7 +15,12 @@ import requests
 import numpy as np
 
 
-API_KEY = "RqucU21MbLqBahCSnZh1KkyYttdSlR7m"
+# TomTom API anahtarı environment variable'dan okunuyor.
+# Lokal: backend/.env dosyasından, prod: Render dashboard env vars'tan.
+API_KEY = os.getenv("TOMTOM_API_KEY", "")
+if not API_KEY:
+    print("[UYARI] TOMTOM_API_KEY environment variable set degil. "
+          "Routing fonksiyonlari calismayacak. backend/.env dosyasini kontrol et.")
 
 WORKDAY_START_HOUR = 8
 NUM_SLOTS = 5

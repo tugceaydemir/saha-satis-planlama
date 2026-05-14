@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -8,7 +9,9 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import User
 
-SECRET_KEY = "saha-satis-planlama-secret-key-2026"
+# JWT secret artık environment variable'dan okunuyor.
+# Lokal geliştirmede .env dosyasından, prod'da Render dashboard'dan gelir.
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-only-secret-CHANGE-IN-PRODUCTION")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 saat
 

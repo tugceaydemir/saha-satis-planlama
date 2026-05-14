@@ -9,5 +9,14 @@ services:
         value: "3.11"
       - key: NODE_VERSION
         value: "18"
+      # Asagidaki 3 deger Render Dashboard > Environment > Edit'ten elle set edilecek.
+      # sync: false demek "bu degeri YAML'da tutma, manuel gir" demek.
       - key: DATABASE_URL
-        value: "postgresql://neondb_owner:npg_OgpXnhek8Pu1@ep-shy-salad-alaaaj7c-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require"
+        sync: false
+      - key: TOMTOM_API_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      # OSRM (Faz 1'de kullanilacak, public oldugu icin acik kalabilir)
+      - key: OSRM_BASE_URL
+        value: "https://router.project-osrm.org"
