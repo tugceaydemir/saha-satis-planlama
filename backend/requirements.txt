@@ -12,3 +12,4 @@ passlib
 bcrypt==4.0.1
 requests
 aiofiles
+psycopg2-binary

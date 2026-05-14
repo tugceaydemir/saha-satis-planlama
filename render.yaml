@@ -9,3 +9,5 @@ services:
         value: "3.11"
       - key: NODE_VERSION
         value: "18"
+      - key: DATABASE_URL
+        value: "postgresql://neondb_owner:npg_OgpXnhek8Pu1@ep-shy-salad-alaaaj7c-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require"
