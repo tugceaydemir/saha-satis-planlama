@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse
 
 from .database import engine, Base, SessionLocal
 from .models import Plan
-from .routers import auth, customers, sales_reps, plans, settings, performance, announcements
+from .routers import auth, customers, sales_reps, plans, settings, performance, announcements, visits
 
 Base.metadata.create_all(bind=engine)
 
@@ -55,6 +55,7 @@ app.include_router(plans.router)
 app.include_router(settings.router)
 app.include_router(performance.router)
 app.include_router(announcements.router)
+app.include_router(visits.router)
 
 
 # ── Frontend static dosyaları (deploy modunda) ──

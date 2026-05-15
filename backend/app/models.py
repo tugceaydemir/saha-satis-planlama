@@ -150,6 +150,10 @@ class SalesVisit(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    # Faz 3a: Mobil app'ten ziyaret tamamlama icin eklenen alanlar.
+    # route_stop_id NULL olabilir cunku eski kayitlarda bu alan yoktu.
+    route_stop_id = Column(Integer, ForeignKey("route_stops.id"), nullable=True)
+    order_items_count = Column(Integer, nullable=True)
     visit_date = Column(Date, nullable=False, default=date.today)
     sale_amount = Column(Float, nullable=False, default=0)
     visited = Column(Integer, nullable=False, default=1)
@@ -158,6 +162,7 @@ class SalesVisit(Base):
 
     user = relationship("User")
     customer = relationship("Customer")
+    route_stop = relationship("RouteStop")
 
 
 class Announcement(Base):

@@ -134,15 +134,15 @@ class DailyRouteOut(BaseModel):
     stops: list[RouteStopOut]
 
 
-# ─── Route Geometry (Faz 1 — OSRM ile gerçek yol çizgisi) ───
+# ─── Route Geometry (Faz 1 — TomTom ile gerçek yol çizgisi) ───
 class RouteGeometryOut(BaseModel):
     """
-    OSRM'den alinan gercek yol geometrisi.
+    TomTom'dan alinan gercek yol geometrisi.
 
     geometry: [[lat, lon], [lat, lon], ...] formatinda nokta listesi.
               Frontend bu listeyi Polyline icin dogrudan kullanabilir.
-    distance_meters: OSRM'in hesapladigi gercek yol mesafesi (metre)
-    duration_seconds: OSRM'in tahmini suresi (saniye, trafik HARI\u00c7)
+    distance_meters: TomTom'un hesapladigi gercek yol mesafesi (metre)
+    duration_seconds: TomTom'un tahmini suresi (saniye, trafik dahil)
     waypoints: Durak koordinatlari (sira ile). Frontend marker icin kullanabilir.
     """
     geometry: list[list[float]]
@@ -223,6 +223,35 @@ class SalesVisitOut(BaseModel):
     visited: int
     notes: str | None
     created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ─── Visit Completion (Faz 3a — mobil app için ziyaret tamamlama) ───
+class VisitCompletionCreate(BaseModel):
+    """
+    Mobil app'ten gelen ziyaret tamamlama isteği.
+    route_stop_id, hangi durağın tamamlandığını belirtir.
+    """
+    route_stop_id: int
+    order_amount: float = 0.0
+    order_items_count: int | None = None
+    notes: str | None = None
+
+
+class VisitCompletionOut(BaseModel):
+    """
+    Tamamlanan bir ziyaretin döndüğü format.
+    """
+    id: int
+    route_stop_id: int | None
+    customer_id: int
+    customer_name: str | None = None
+    visit_order: int | None = None
+    sale_amount: float
+    order_items_count: int | None
+    notes: str | None
+    completed_at: datetime
 
     model_config = {"from_attributes": True}
 
